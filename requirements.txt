@@ -4,3 +4,4 @@ plotly
 dotenv
 sqlalchemy
 psycopg2
+yfinance
