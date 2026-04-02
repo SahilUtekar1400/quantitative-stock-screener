@@ -37,6 +37,4 @@ cd quantitative-stock-screener
 pip install -r requirements.txt
 ```
 **3. Launch the Dashboard:**
-```bash
-streamlit run dashboard.py
-```
+just run the file
