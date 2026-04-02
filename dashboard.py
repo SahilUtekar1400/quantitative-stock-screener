@@ -1,11 +1,10 @@
 # 1. Importing all the required libraries
 import streamlit as st
-import sqlite3
 import pandas as pd
 import plotly.graph_objects as go
-
-# 5. Connecting to the sqlite db
-# conn = sqlite3.connect("market_data.db")
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
 
 # 2. Setting up the list for scalability
 symbols = ["RELIANCE.NS","HDFCBANK.NS"]
@@ -20,17 +19,15 @@ symbol = st.selectbox(label="Symbols",options=symbols)
 # 14. Senior Upgrade
 @st.cache_data
 def fetch_market_data(ticker):
-    conn = sqlite3.connect("market_data.db")
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    engine = create_engine(DATABASE_URL)
+
     query = f'SELECT * FROM "{ticker}"'
-    df = pd.read_sql_query(query,conn,index_col='Date',parse_dates=['Date'])
-    conn.close()
+    df = pd.read_sql_query(query,engine,index_col='Date',parse_dates=['Date'])
     return df
 
-# 7. Stating the query to fetch data from the tables in db
-# query = f'SELECT * FROM "{symbol}"'
-
 # 8. Reading the data queried.
-# read_query = pd.read_sql_query(query,conn,index_col="Date",parse_dates=['Date'])
 read_query = fetch_market_data(symbol)
 
 # 10. Setting up the plot figure
@@ -68,7 +65,3 @@ st.dataframe(read_query.tail(10))
 
 # 13. Ploting the figure
 st.plotly_chart(fig,use_container_width=True)
-
-
-# 6. Closing the connection for further working
-# conn.close()
