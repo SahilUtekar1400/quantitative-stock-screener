@@ -6,15 +6,39 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
-# 2. Setting up the list for scalability
-symbols = ["RELIANCE.NS","HDFCBANK.NS"]
-
 # 3. Providing a frontend UI.
 st.set_page_config(page_title="Financial Dashboard",layout="wide")
 st.title("Ticker-Tracker for your financial tracking!")
 
-# 4. Setting up a dropdown list for all symbols
-symbol = st.selectbox(label="Symbols",options=symbols)
+# 2. Setting up the list for scalability
+INDICIES = {
+    "NSE (Nifty 50)" : ['ADANIENT.NS', 'ADANIPORTS.NS', 'APOLLOHOSP.NS', 'ASIANPAINT.NS', 'AXISBANK.NS', 
+           'BAJAJ-AUTO.NS', 'BAJFINANCE.NS', 'BAJAJFINSV.NS', 'BEL.NS', 'BHARTIARTL.NS', 
+           'CIPLA.NS', 'COALINDIA.NS', 'DRREDDY.NS', 'EICHERMOT.NS', 'ETERNAL.NS', 
+           'GRASIM.NS', 'HCLTECH.NS', 'HDFCBANK.NS', 'HDFCLIFE.NS', 'HINDALCO.NS', 
+           'HINDUNILVR.NS', 'ICICIBANK.NS', 'ITC.NS', 'INFY.NS', 'INDIGO.NS', 
+           'JSWSTEEL.NS', 'JIOFIN.NS', 'KOTAKBANK.NS', 'LT.NS', 'M&M.NS', 'MARUTI.NS', 
+           'MAXHEALTH.NS', 'NTPC.NS', 'NESTLEIND.NS', 'ONGC.NS', 'POWERGRID.NS', 
+           'RELIANCE.NS', 'SBILIFE.NS', 'SHRIRAMFIN.NS', 'SBIN.NS', 'SUNPHARMA.NS', 
+           'TCS.NS', 'TATACONSUM.NS', 'TMPV.NS', 'TATASTEEL.NS', 'TECHM.NS', 'TITAN.NS', 
+           'TRENT.NS', 'ULTRACEMCO.NS', 'WIPRO.NS'],
+
+    "BSE (Sensex 30)" : ['ADANIPORTS.BO', 'ASIANPAINT.BO', 'AXISBANK.BO', 'BAJFINANCE.BO', 
+           'BAJAJFINSV.BO', 'BHARTIARTL.BO', 'HCLTECH.BO', 'HDFCBANK.BO', 'HINDUNILVR.BO', 
+           'ICICIBANK.BO', 'INDUSINDBK.BO', 'INFY.BO', 'ITC.BO', 'KOTAKBANK.BO', 'LT.BO', 
+           'M&M.BO', 'MARUTI.BO', 'NESTLEIND.BO', 'NTPC.BO', 'POWERGRID.BO', 'RELIANCE.BO', 
+           'SBIN.BO', 'SUNPHARMA.BO', 'TCS.BO', 'TATAMOTORS.BO', 'TATASTEEL.BO', 'TECHM.BO', 
+           'TITAN.BO', 'ULTRACEMCO.BO', 'WIPRO.BO'],
+}
+
+col1, col2 = st.columns(2)
+
+with col1:
+    selected_exchange = st.selectbox("Select Exchange",options=list(INDICIES.keys()))
+
+with col2:
+    # 4. Setting up a dropdown list for all symbols
+    symbol = st.selectbox(label="Symbols",options=INDICIES[selected_exchange])
 
 # 14. Senior Upgrade
 @st.cache_data
@@ -28,8 +52,10 @@ def fetch_market_data(ticker):
     return df
 
 # 8. Reading the data queried.
-read_query = fetch_market_data(symbol)
-
+try:
+    read_query = fetch_market_data(symbol)
+except Exception as e:
+    st.error(f"Data for {symbol} not found in the database. Kindly choose other option.")
 # 10. Setting up the plot figure
 fig = go.Figure()
 
