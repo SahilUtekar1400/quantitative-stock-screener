@@ -29,13 +29,14 @@ Unlike static data visualization scripts, this application separates the data ex
 
 **1. Clone the repository:**
 ```bash
-git clone [https://github.com/YOUR-USERNAME/quantitative-stock-screener.git](https://github.com/YOUR-USERNAME/quantitative-stock-screener.git)
+git clone [https://github.com/SahilUtekar1400/quantitative-stock-screener.git](https://github.com/SahilUtekar1400/quantitative-stock-screener.git)
 cd quantitative-stock-screener
-
-**2. Install Dependencies:
+```
+**2. Install Dependencies:**
 ```bash
 pip install -r requirements.txt
-
-**3. Launch the Dashboard:
+```
+**3. Launch the Dashboard:**
 ```bash
 streamlit run dashboard.py
+```
