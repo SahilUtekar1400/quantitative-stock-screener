@@ -1,38 +1,48 @@
-# Quantitative Stock Screener & Automated ETL Pipeline
+# Quantitative Screener, Automated ETL & Predictive ML Pipeline
 
 ## Overview
-This project is a fully automated, cloud-hosted ETL (Extract, Transform, Load) data pipeline and interactive financial dashboard. It is designed to capture market data, engineer technical indicators, and serve them via a reactive web interface with zero manual intervention.
+This project is an end-to-end quantitative financial pipeline. It features a fully automated ETL architecture extracting daily data for the NIFTY 50 and SENSEX 30 indices, advanced feature engineering for technical indicators, a cloud-hosted relational database, and a multi-panel reactive dashboard. Currently, it includes an active Machine Learning sandbox for predictive price modeling.
 
 ## The Architecture
-This application utilizes a decoupled, enterprise-grade architecture, separating the backend automation from the frontend client.
+The system is decoupled into discrete, scalable micro-layers:
 
-1. **Extraction (GitHub Actions & yfinance):** A CI/CD cron job wakes up an Ubuntu server daily at market close (12:00 PM UTC / 5:30 PM IST). It queries the Yahoo Finance API to extract the latest daily market data for a target portfolio.
-2. **Transformation (Pandas):** The data is processed in-memory to standardize time-series indices and engineer rolling statistical features (e.g., 50-Day Moving Average).
-3. **Storage (Supabase PostgreSQL):** Using `SQLAlchemy` and `psycopg2`, the script securely connects to a Supabase connection pooler and pushes the transformed data into a persistent cloud PostgreSQL database.
-4. **Visualization (Streamlit & Plotly):** A reactive web UI hosted on Render directly queries the Supabase vault. It utilizes in-memory caching to prevent database bottlenecking and deploys fluid, responsive candlestick charts for technical analysis.
+### 1. Extraction & Automation (Fault-Tolerant ETL)
+* **Scale:** Bulk downloads historical daily market data for 80 Indian equities (NSE & BSE).
+* **Automation:** GitHub Actions CI/CD executes a serverless cron job daily at market close.
+* **Fault Tolerance:** Built-in `try/except` quarantine protocols ensure the pipeline survives API rate limits, missing tickers, or network drops without fatal crashes.
+
+### 2. Quantitative Transformation (Feature Engineering)
+Translates raw price action into multi-dimensional algorithmic signals using Pandas.
+* **Trend & Lag Management:** Utilizes Exponential Weighted Moving Averages (EMA) via `ewm()` rather than standard Simple Moving Averages (SMA) to eliminate lag on reversal signals.
+* **Momentum:** Relative Strength Index (RSI - 14 Day).
+* **Trend Reversal:** Moving Average Convergence Divergence (MACD & Signal Line).
+* **Risk:** 20-Day Standard Deviation (Volatility).
+
+### 3. Storage (Cloud PostgreSQL)
+* Replaces ephemeral local storage with a persistent **Supabase PostgreSQL** cloud vault.
+* Utilizes `SQLAlchemy` and `psycopg2` with connection pooling to manage network routing and secure environment variable integration.
+
+### 4. Client Interface (Streamlit & Plotly Subplots)
+* **Cascading UI:** Dynamic exchange-to-ticker dropdown logic.
+* **Scale-Collapse Prevention:** Utilizes Plotly's `make_subplots` to render a synchronized, 3-panel visual hierarchy. This prevents massive price scales from crushing smaller momentum oscillators (RSI/MACD) by assigning independent Y-axes while locking a shared chronological X-axis.
+
+### 5. Predictive Analytics (Machine Learning Sandbox)
+* **Algorithm:** Random Forest Regressor (`scikit-learn`).
+* **Objective:** Predicting $T+1$ (Tomorrow's) closing price based on today's multidimensional signals (Price, RSI, MACD, Volatility).
+* **Time-Series Integrity:** Strict `shuffle=False` train-test splitting to prevent future data leakage during model training.
 
 ## Tech Stack
 * **Language:** Python 3.10+
-* **Data Manipulation:** Pandas
-* **Database:** PostgreSQL (Supabase Cloud)
-* **ORM / Database Adapters:** SQLAlchemy, psycopg2-binary
-* **Visualization:** Plotly Graph Objects
-* **Web Framework:** Streamlit (Deployed on Render)
-* **Automation:** GitHub Actions (YAML CI/CD)
-
-## Key Features
-* **Zero-Touch Automation:** Daily data extraction and database updates run entirely in the background via GitHub Actions.
-* **Cloud Database Engineering:** Transitioned from ephemeral local SQLite storage to persistent PostgreSQL utilizing connection pooling for optimized network routing.
-* **Secure Credential Management:** Database URIs and passwords are strictly managed via environment variables (`.env`) and GitHub Secrets, ensuring zero credential leakage in the source code.
-* **Interactive Candlestick Charting:** Professional-grade visual layout featuring zoom, pan, and hover-state metrics, overlaid with algorithmic trendlines.
+* **Data & Math:** Pandas, Scikit-Learn
+* **Database:** PostgreSQL (Supabase Cloud), SQLAlchemy
+* **Visualization:** Plotly Graph Objects, Matplotlib
+* **Deployment:** Streamlit Community / Render, GitHub Actions (YAML CI/CD)
 
 ## How to Run Locally
 
-If you wish to clone and run this architecture on your local machine, follow these steps strictly to ensure database security.
-
 **1. Clone the repository:**
 ```bash
-git clone [https://github.com/SahilUtekar1400/quantitative-stock-screener.git](https://github.com/SahilUtekar1400/quantitative-stock-screener.git)
+git clone [https://github.com/YOUR-USERNAME/quantitative-stock-screener.git](https://github.com/YOUR-USERNAME/quantitative-stock-screener.git)
 cd quantitative-stock-screener
 ```
 
@@ -53,10 +63,15 @@ DATABASE_URL="postgresql://username:password@your-database-host:6543/postgres"
 Populate the Database (First Run):
 ```
 
-**5. Launch the Dashboard:**
+**5. Execute the ML Sandbox (Local Prediction):**
+```bash
+python ml_sandbox.py
+```
+
+**6. Launch the Dashboard:**
 ```bash
 Launch the Dashboard:
 ```
 
 **Author**
--Sahil Utekar Building quantitative data pipelines and automated analytical tools.
+-Sahil Utekar Building Quantitative Data Engineering & Machine Learning.
