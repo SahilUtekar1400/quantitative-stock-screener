@@ -47,7 +47,29 @@ for symbol in all_symbols:
             print(f"Warning: No data found for {symbol}. Skipping.")
             continue
 
+        # Feature Engineering
+        # 1. Trend analysis: 50 day moving avg.
         data['SMA_50'] = data['Close'].rolling(window=50).mean()
+
+        # 2. Risk analysis: 20 day volatility (Standard Deviation)
+        data['Volatility'] = data['Close'].rolling(window=20).std()
+
+        # 3. Momentum analysis: Relative Strength Index (RSI - 14 days)
+        delta = data['Close'].diff()
+        avg_gain = delta.where(delta>0,0).ewm(alpha=1/14, adjust=False).mean()
+        avg_loss = (-delta.where(delta<0,0)).ewm(alpha=1/14, adjust=False).mean()
+        rs = avg_gain/avg_loss
+        data['RSI'] = 100 - (100 / (1 + rs))
+
+        # 4. Trend Reversal: MACD (12 day EMA, 26 day EMA, 9 day signal)
+        ema_12d = data['Close'].ewm(span=12, adjust=False).mean()
+        ema_26d = data['Close'].ewm(span=26, adjust=False).mean()
+        data['MACD'] = ema_12d - ema_26d
+        data['Signal_Line'] = data['MACD'].ewm(span=9, adjust=False).mean()
+        data['MACD_Histogram'] = data['MACD'] - data['Signal_Line']
+
+        # Droping NaN values created using rolling window
+        data.dropna()
 
         data.to_sql(symbol,engine,if_exists='replace')
         print(f"Successfully pushed {symbol} to Supbase PostgreSQL.")
